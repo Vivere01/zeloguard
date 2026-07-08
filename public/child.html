@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ZeloGuard">
+  <title>ZeloGuard — Rastreamento</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 1: CONSENT (shown on first visit)
+       ══════════════════════════════════════════ -->
+  <div id="screen-consent" class="tracker-wrapper" style="display:none;">
+    <div class="tracker-card glass-panel">
+      <div class="logo-container" style="margin-bottom: 8px;">
+        <div class="logo-icon" style="width:36px;height:36px;font-size:1.2rem;border-radius:10px;">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div class="logo-text" style="font-size:1.5rem;">ZeloGuard</div>
+      </div>
+
+      <div class="status-pulse-container" style="margin:28px 0 20px;">
+        <div class="radar-pulse" id="consent-radar">
+          <div class="radar-pulse-core" style="background: linear-gradient(135deg,#6366f1,#8b5cf6);">
+            <i class="fa-solid fa-location-crosshairs"></i>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="tracker-title" style="font-size:1.5rem;" id="consent-title">Solicitação de Rastreamento</h2>
+      <p class="tracker-subtitle" id="consent-desc" style="margin-bottom:28px;">
+        Um responsável deseja acompanhar a sua localização em tempo real pelo <strong>ZeloGuard</strong>. Clique em <em>Autorizar</em> para iniciar o compartilhamento.
+      </p>
+
+      <!-- What will be shared info box -->
+      <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:16px;text-align:left;margin-bottom:24px;">
+        <p style="font-size:0.82rem;font-weight:700;color:var(--accent-indigo);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em;">
+          <i class="fa-solid fa-circle-info"></i> O que será compartilhado:
+        </p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+          <li style="font-size:0.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-check" style="color:var(--accent-emerald);"></i> Localização GPS em tempo real
+          </li>
+          <li style="font-size:0.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-check" style="color:var(--accent-emerald);"></i> Nível de bateria do dispositivo
+          </li>
+          <li style="font-size:0.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-xmark" style="color:var(--accent-rose);"></i> <span>Nenhuma câmera, microfone ou mensagem</span>
+          </li>
+        </ul>
+      </div>
+
+      <button id="btn-consent" class="btn btn-primary" style="width:100%;padding:16px;font-size:1rem;">
+        <i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento
+      </button>
+      <p style="margin-top:14px;font-size:0.75rem;color:var(--text-muted);line-height:1.5;">
+        Ao autorizar, o browser solicitará permissão de GPS. Você pode revogar o acesso a qualquer momento com o responsável.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2: ACTIVE TRACKING
+       ══════════════════════════════════════════ -->
+  <div id="screen-tracking" class="tracker-wrapper" style="display:none;">
+    <div class="tracker-card glass-panel">
+      <div class="logo-container" style="margin-bottom: 16px;">
+        <div class="logo-icon" style="width:32px;height:32px;font-size:1.1rem;border-radius:8px;">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div class="logo-text" style="font-size:1.4rem;">ZeloGuard</div>
+      </div>
+
+      <h2 class="tracker-title" id="tracker-title">Rastreamento Ativo</h2>
+      <p class="tracker-subtitle" id="tracker-status-desc">Transmitindo localização para o responsável...</p>
+
+      <div class="status-pulse-container">
+        <div class="radar-pulse active-tracking" id="radar-pulse">
+          <div class="radar-pulse-core">
+            <i class="fa-solid fa-location-crosshairs"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Stats -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-label"><i class="fa-solid fa-compass"></i> Latitude</span>
+          <span class="stat-value" id="stat-lat">--</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label"><i class="fa-solid fa-compass"></i> Longitude</span>
+          <span class="stat-value" id="stat-lng">--</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label"><i class="fa-solid fa-bullseye"></i> Precisão</span>
+          <span class="stat-value" id="stat-accuracy">--</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label"><i class="fa-solid fa-battery-three-quarters"></i> Bateria</span>
+          <span class="stat-value" id="stat-battery">--</span>
+        </div>
+      </div>
+
+      <!-- Simulator Panel -->
+      <div class="simulator-panel glass-panel" style="padding:16px;background:rgba(0,0,0,0.15);">
+        <div class="simulator-header">
+          <span class="simulator-title"><i class="fa-solid fa-flask"></i> Simulador de Rota</span>
+          <label class="switch">
+            <input type="checkbox" id="simulator-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="simulator-desc">Simule deslocamento sem sair do lugar — ideal para testar o mapa de monitoramento.</p>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="simulation-city">Cidade de Teste</label>
+          <select class="form-control" id="simulation-city" style="background:rgba(13,18,32,0.8);">
+            <option value="saopaulo">São Paulo (Centro)</option>
+            <option value="riodejaneiro">Rio de Janeiro (Copacabana)</option>
+            <option value="novayork">Nova York (Central Park)</option>
+            <option value="lisboa">Lisboa (Praça do Comércio)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PWA Install Banner -->
+      <div id="install-banner" style="display:none;margin-top:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:14px;">
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:10px;">
+          <i class="fa-solid fa-mobile-screen" style="color:var(--accent-indigo);"></i>
+          <strong style="color:var(--text-primary);"> Instale como app</strong> para rastrear com a tela apagada no Android.
+        </p>
+        <button id="btn-install" class="btn btn-primary" style="width:100%;padding:10px;font-size:0.85rem;">
+          <i class="fa-solid fa-download"></i> Instalar ZeloGuard
+        </button>
+      </div>
+
+      <!-- iOS Hint -->
+      <div id="ios-hint" style="display:none;margin-top:16px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:14px;">
+        <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+          <i class="fa-brands fa-apple" style="color:var(--accent-amber);"></i>
+          <strong style="color:var(--text-primary);"> iPhone/iPad:</strong> Para melhor rastreamento, mantenha esta tela aberta e com o brilho ativo. No Safari, toque em <i class="fa-solid fa-arrow-up-from-bracket"></i> → <em>"Adicionar à Tela de Início"</em>.
+        </p>
+      </div>
+
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;align-items:center;">
+        <span class="badge badge-offline" id="connection-badge">Desconectado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 3: ACCESS REVOKED
+       ══════════════════════════════════════════ -->
+  <div id="screen-revoked" class="tracker-wrapper" style="display:none;">
+    <div class="tracker-card glass-panel" style="text-align:center;">
+      <div style="font-size:3.5rem;margin-bottom:20px;">🔒</div>
+      <h2 class="tracker-title" style="color:var(--accent-rose);">Acesso Revogado</h2>
+      <p class="tracker-subtitle" style="margin-bottom:28px;">
+        O responsável desconectou este dispositivo do monitoramento. Nenhuma localização está sendo transmitida.
+      </p>
+      <div style="background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:16px;margin-bottom:24px;">
+        <p style="font-size:0.85rem;color:var(--text-secondary);">
+          Para reativar o rastreamento, peça ao responsável que gere um novo link de acesso pelo <strong>Painel ZeloGuard</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 4: ERROR / INVALID LINK
+       ══════════════════════════════════════════ -->
+  <div id="screen-error" class="tracker-wrapper" style="display:none;">
+    <div class="tracker-card glass-panel" style="text-align:center;">
+      <div style="font-size:3.5rem;margin-bottom:20px;">⚠️</div>
+      <h2 class="tracker-title" style="color:var(--accent-amber);">Link Inválido</h2>
+      <p class="tracker-subtitle">Este link de rastreamento não é válido ou expirou. Solicite um novo link ao responsável.</p>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast" id="toast">Mensagem</div>
+
+  <!-- Socket.io + tracker logic -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/child.js"></script>
+</body>
+</html>

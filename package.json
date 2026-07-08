@@ -1,0 +1,21 @@
+{
+  "name": "zeloguard",
+  "version": "1.0.0",
+  "description": "Parental monitoring web application with real-time tracking.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "parental-control",
+    "realtime-tracking",
+    "leaflet",
+    "socket.io"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeloGuard - Monitoramento Parental em Tempo Real</title>
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="landing-container">
+    <header class="landing-header">
+      <div class="logo-container">
+        <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="logo-text">ZeloGuard</div>
+      </div>
+      <h1 class="landing-title">Cuidado inteligente para quem você mais ama</h1>
+      <p class="landing-subtitle">
+        Acompanhe a localização de seus filhos em tempo real diretamente no mapa. Simples, seguro e sem a necessidade de instalar aplicativos complexos.
+      </p>
+    </header>
+
+    <div class="portal-grid">
+      <!-- Parent Portal Card -->
+      <div class="portal-card glass-panel">
+        <div>
+          <i class="fa-solid fa-user-shield"></i>
+          <h3>Painel dos Pais</h3>
+          <p>Cadastre novos usuários, acompanhe o mapa em tempo real, veja o histórico de rotas e monitore o status de conexão dos dispositivos.</p>
+        </div>
+        <a href="parent.html" class="btn btn-primary" id="btn-parent-dashboard">
+          Acessar Painel <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Child Portal Card -->
+      <div class="portal-card glass-panel">
+        <div>
+          <i class="fa-solid fa-location-crosshairs"></i>
+          <h3>Dispositivo do Filho</h3>
+          <p>O rastreamento é ativado a partir de um link exclusivo gerado no painel dos pais. Abra o link no celular do seu filho para transmitir a localização.</p>
+        </div>
+        <a href="parent.html" class="btn btn-secondary">
+          Gerar Link de Rastreio <i class="fa-solid fa-link"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div style="width: 100%; max-width: 800px; text-align: center;">
+      <h4 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px;">Como funciona?</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: left;">
+        <div class="glass-panel" style="padding: 20px; border-radius: var(--radius-sm);">
+          <h5 style="font-weight: 700; margin-bottom: 8px; color: var(--accent-indigo);">1. Crie o Perfil</h5>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Cadastre o nome do seu filho e escolha uma cor para diferenciá-lo no mapa.</p>
+        </div>
+        <div class="glass-panel" style="padding: 20px; border-radius: var(--radius-sm);">
+          <h5 style="font-weight: 700; margin-bottom: 8px; color: var(--accent-violet);">2. Abra o Link</h5>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Copie o link único gerado e abra no navegador do smartphone do seu filho.</p>
+        </div>
+        <div class="glass-panel" style="padding: 20px; border-radius: var(--radius-sm);">
+          <h5 style="font-weight: 700; margin-bottom: 8px; color: var(--accent-emerald);">3. Acompanhe</h5>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Veja o marcador se mover no mapa em tempo real com atualizações automáticas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
