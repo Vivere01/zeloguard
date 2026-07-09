@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ─── Consent: first time flow & Auto-trigger ────────────────────────────────
-  async function triggerConsentFlow() {
+  async function triggerConsentFlow(isAuto = false) {
     showScreen('consent');
     if (consentBtn) {
       consentBtn.disabled = true;
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Request GPS permission by trying to get position once
     if (!navigator.geolocation) {
-      showToast('Este browser não suporta geolocalização.');
+      if (!isAuto) showToast('Este browser não suporta geolocalização.');
       if (consentBtn) {
         consentBtn.disabled = false;
         consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } catch (err) {
           console.error('[Consent] Error:', err);
-          showToast('Erro ao confirmar autorização. Tente novamente.');
+          if (!isAuto) showToast('Erro ao confirmar autorização. Tente novamente.');
           if (consentBtn) {
             consentBtn.disabled = false;
             consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
@@ -260,11 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       },
       (err) => {
-        let msg = 'GPS não autorizado. Permita o acesso à localização.';
-        if (err.code === err.PERMISSION_DENIED) {
-          msg = 'Permissão de GPS negada. Vá em Configurações do browser para permitir.';
+        if (!isAuto) {
+          let msg = 'GPS não autorizado. Permita o acesso à localização.';
+          if (err.code === err.PERMISSION_DENIED) {
+            msg = 'Permissão de GPS negada. Vá em Configurações do browser para permitir.';
+          }
+          showToast(msg);
         }
-        showToast(msg);
         if (consentBtn) {
           consentBtn.disabled = false;
           consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
@@ -274,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  consentBtn?.addEventListener('click', triggerConsentFlow);
+  consentBtn?.addEventListener('click', () => triggerConsentFlow(false));
 
   // ─── Begin tracking (after consent or auto-reconnect) ─────────────────────
   async function beginTracking() {
@@ -298,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Session belongs to a different userId in the URL — ignore
     if (!session || session.userId !== userId) {
-      triggerConsentFlow();
+      triggerConsentFlow(true);
       return;
     }
 
@@ -328,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('[AutoReconnect] Server error:', err);
       // Network error — trigger consent flow just in case
       clearSession();
-      triggerConsentFlow();
+      triggerConsentFlow(true);
     }
   }
 
