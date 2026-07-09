@@ -9,7 +9,24 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'db.json');
+
+// Determine database file path based on environment
+const IS_VERCEL = process.env.VERCEL || process.env.NOW_REGION;
+const PACKAGED_DB_FILE = path.join(__dirname, 'db.json');
+const DB_FILE = IS_VERCEL ? '/tmp/db.json' : PACKAGED_DB_FILE;
+
+// Copy initial db.json to /tmp if running on Vercel and it doesn't exist
+if (IS_VERCEL && !fs.existsSync(DB_FILE)) {
+  try {
+    if (fs.existsSync(PACKAGED_DB_FILE)) {
+      fs.copyFileSync(PACKAGED_DB_FILE, DB_FILE);
+    } else {
+      fs.writeFileSync(DB_FILE, JSON.stringify({ users: [] }, null, 2));
+    }
+  } catch (err) {
+    console.error('Failed to initialize database in /tmp:', err);
+  }
+}
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

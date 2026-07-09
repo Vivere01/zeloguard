@@ -211,18 +211,28 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  // ─── Consent: first time flow ──────────────────────────────────────────────
-  consentBtn?.addEventListener('click', async () => {
-    consentBtn.disabled = true;
-    consentBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aguardando GPS...';
+  // ─── Consent: first time flow & Auto-trigger ────────────────────────────────
+  async function triggerConsentFlow() {
+    showScreen('consent');
+    if (consentBtn) {
+      consentBtn.disabled = true;
+      consentBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Solicitando GPS...';
+    }
 
-    await requestNotificationPermission();
+    // Try requesting notifications permission (requires user gesture in some browsers, but we call it anyway)
+    try {
+      await requestNotificationPermission();
+    } catch (e) {
+      console.warn('[Notifications] Blocked or unsupported on load:', e);
+    }
 
     // Request GPS permission by trying to get position once
     if (!navigator.geolocation) {
       showToast('Este browser não suporta geolocalização.');
-      consentBtn.disabled = false;
-      consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
+      if (consentBtn) {
+        consentBtn.disabled = false;
+        consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
+      }
       return;
     }
 
@@ -243,8 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
           console.error('[Consent] Error:', err);
           showToast('Erro ao confirmar autorização. Tente novamente.');
-          consentBtn.disabled = false;
-          consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
+          if (consentBtn) {
+            consentBtn.disabled = false;
+            consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
+          }
         }
       },
       (err) => {
@@ -253,12 +265,16 @@ document.addEventListener('DOMContentLoaded', () => {
           msg = 'Permissão de GPS negada. Vá em Configurações do browser para permitir.';
         }
         showToast(msg);
-        consentBtn.disabled = false;
-        consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
+        if (consentBtn) {
+          consentBtn.disabled = false;
+          consentBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> Autorizar Monitoramento';
+        }
       },
       { enableHighAccuracy: true, timeout: 15000 }
     );
-  });
+  }
+
+  consentBtn?.addEventListener('click', triggerConsentFlow);
 
   // ─── Begin tracking (after consent or auto-reconnect) ─────────────────────
   async function beginTracking() {
@@ -282,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Session belongs to a different userId in the URL — ignore
     if (!session || session.userId !== userId) {
-      showScreen('consent');
+      triggerConsentFlow();
       return;
     }
 
@@ -310,9 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       console.error('[AutoReconnect] Server error:', err);
-      // Network error — still show consent to be safe
+      // Network error — trigger consent flow just in case
       clearSession();
-      showScreen('consent');
+      triggerConsentFlow();
     }
   }
 
