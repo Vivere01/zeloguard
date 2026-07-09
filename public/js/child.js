@@ -33,6 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const installBanner     = document.getElementById('install-banner');
   const iosBanner         = document.getElementById('ios-hint');
   const installBtn        = document.getElementById('btn-install');
+  
+  // Modal elements
+  const modalPermission    = document.getElementById('modal-permission');
+  const modalBody          = document.getElementById('modal-permission-body');
+  const btnCloseModal      = document.getElementById('btn-close-modal');
+
+  btnCloseModal?.addEventListener('click', () => {
+    modalPermission?.classList.remove('show');
+  });
 
   // ─── Parse URL ─────────────────────────────────────────────────────────────
   const urlParams = new URLSearchParams(window.location.search);
@@ -211,6 +220,189 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  // ─── Browser and OS Detection ──────────────────────────────────────────────
+  function detectBrowserAndOS() {
+    const ua = navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/i.test(ua);
+    const isAndroid = /android/i.test(ua);
+    
+    // Detect in-app webviews (WhatsApp, Instagram, FB, Messenger, etc)
+    const isInApp = /instagram|fbav|fb_iab|messenger|whatsapp/i.test(ua) || (isIos && !/safari/i.test(ua) && /twitter|line|linkedin/i.test(ua));
+    
+    let browser = 'other';
+    if (/chrome|crios/i.test(ua) && !/edge|edg/i.test(ua)) {
+      browser = 'chrome';
+    } else if (/safari/i.test(ua) && !/chrome|crios|chromium/i.test(ua)) {
+      browser = 'safari';
+    } else if (/samsungbrowser/i.test(ua)) {
+      browser = 'samsung';
+    } else if (/firefox|fxios/i.test(ua)) {
+      browser = 'firefox';
+    }
+    
+    return { isIos, isAndroid, isInApp, browser };
+  }
+
+  function showPermissionHelp() {
+    const { isIos, isAndroid, isInApp, browser } = detectBrowserAndOS();
+    let html = '';
+
+    if (isInApp) {
+      html += `
+        <div class="in-app-warning">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Você está no navegador interno do WhatsApp ou Instagram. O iOS/Android bloqueia o acesso ao GPS por aqui por segurança.
+        </div>
+        <div class="instruction-step">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <strong>Abra no navegador padrão:</strong><br>
+            Toque nos <strong>três pontinhos (...)</strong> ou no ícone da bússola/Safari no canto da tela e selecione <strong>"Abrir no Safari"</strong> ou <strong>"Abrir no Chrome"</strong>.
+          </div>
+        </div>
+      `;
+    } else if (isIos) {
+      if (browser === 'safari') {
+        html += `
+          <p style="color: var(--text-secondary); margin-bottom: 16px;">O Safari do seu iPhone bloqueou a localização. Siga os passos:</p>
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              Toque no ícone <strong>"aA"</strong> do lado esquerdo na barra de endereços (pesquisa) do Safari.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              Selecione <strong>"Ajustes do Site"</strong> (Website Settings).
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              Toque em <strong>"Localização"</strong> (Location) e selecione <strong>"Permitir"</strong>.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">4</span>
+            <div class="step-content">
+              <strong>Puxe a tela para baixo</strong> para atualizar e reativar.
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <p style="color: var(--text-secondary); margin-bottom: 16px;">Siga estas instruções para liberar o GPS no iPhone:</p>
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              Abra o aplicativo <strong>"Ajustes"</strong> do seu iPhone.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              Vá em <strong>"Privacidade e Segurança"</strong> -> <strong>"Serviços de Localização"</strong> e garanta que estão ativados.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              Role a lista, clique no seu navegador (ex: Chrome) e escolha <strong>"Durante o Uso do App"</strong> com a <strong>"Localização Precisa"</strong> ativada.
+            </div>
+          </div>
+        `;
+      }
+    } else if (isAndroid) {
+      if (browser === 'chrome') {
+        html += `
+          <p style="color: var(--text-secondary); margin-bottom: 16px;">O Chrome no Android está bloqueando o GPS. Siga estes passos:</p>
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              Toque nos <strong>três pontinhos (...)</strong> no canto superior direito do Chrome.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              Toque no ícone de <strong>Informação (i)</strong> no topo do menu ou vá em <strong>Configurações do Site</strong> -> <strong>Acesso à Localização</strong>.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              Escolha <strong>"Permitir sempre"</strong> ou <strong>"Permitir durante o uso"</strong>.
+            </div>
+          </div>
+        `;
+      } else if (browser === 'samsung') {
+        html += `
+          <p style="color: var(--text-secondary); margin-bottom: 16px;">O Samsung Internet está bloqueando o GPS. Siga estes passos:</p>
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              Toque no <strong>menu de três linhas</strong> no canto inferior direito.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              Vá em <strong>Configurações</strong> -> <strong>Sites e downloads</strong> -> <strong>Permissões de sites</strong>.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              Toque em <strong>Localização</strong> e certifique-se de que o site está <strong>Permitido</strong>.
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <p style="color: var(--text-secondary); margin-bottom: 16px;">Siga estas instruções para liberar o GPS no Android:</p>
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              Acesse as <strong>Configurações</strong> do celular -> <strong>Aplicativos</strong>.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              Escolha o seu navegador (ex: Chrome) -> <strong>Permissões</strong>.
+            </div>
+          </div>
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              Selecione <strong>Localização</strong> e marque <strong>Permitir durante o uso</strong>.
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      html += `
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">Por favor, ative a permissão de localização nas configurações do seu navegador:</p>
+        <div class="instruction-step">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            Vá nas <strong>configurações do navegador</strong> ou clique no ícone de cadeado do lado da URL.
+          </div>
+        </div>
+        <div class="instruction-step">
+          <span class="step-number">2</span>
+          <div class="step-content">
+            Procure por <strong>Permissões de Localização</strong> e defina como <strong>Permitido</strong>.
+          </div>
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = html;
+    modalPermission?.classList.add('show');
+  }
+
   // ─── Consent: first time flow & Auto-trigger ────────────────────────────────
   async function triggerConsentFlow(isAuto = false) {
     showScreen('consent');
@@ -264,8 +456,10 @@ document.addEventListener('DOMContentLoaded', () => {
           let msg = 'GPS não autorizado. Permita o acesso à localização.';
           if (err.code === err.PERMISSION_DENIED) {
             msg = 'Permissão de GPS negada. Vá em Configurações do browser para permitir.';
+            showPermissionHelp();
+          } else {
+            showToast(msg);
           }
-          showToast(msg);
         }
         if (consentBtn) {
           consentBtn.disabled = false;
